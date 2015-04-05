@@ -58,3 +58,15 @@ func New(conn *net.UDPConn, packetSize int) *Daemon {
 
 	return d
 }
+
+func NewFromAddr(network string, addr string, packetSize int) (*Daemon, error) {
+	resolvedAddr, err := net.ResolveUDPAddr(network, addr)
+	if err != nil {
+		return nil, err
+	}
+	conn, err := net.ListenUDP(network, resolvedAddr)
+	if err != nil {
+		return nil, err
+	}
+	return New(conn, packetSize), nil
+}

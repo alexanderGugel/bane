@@ -17,10 +17,7 @@ import (
 )
 
 func main() {
-    addr, _ := net.ResolveUDPAddr("udp", "localhost:1337")
-    conn, _ := net.ListenUDP("udp", addr)
-
-    d := bane.New(conn, 1000)
+    d := bane.NewFromAddr("udp", "localhost:1337", 1000)
     for {
         p := <-d.In
         d.Out <- p
