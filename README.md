@@ -17,7 +17,7 @@ import (
 )
 
 func main() {
-    d := bane.NewFromAddr("udp", "localhost:1337", 1000)
+    d, _ := bane.NewFromAddr("udp", "localhost:1337", 1000)
     for {
         p := <-d.In
         d.Out <- p
