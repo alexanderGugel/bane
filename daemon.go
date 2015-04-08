@@ -2,6 +2,7 @@ package bane
 
 import (
 	"net"
+	"runtime"
 )
 
 type Packet struct {
@@ -53,8 +54,10 @@ func New(conn *net.UDPConn, packetSize int) *Daemon {
 		PacketSize: packetSize,
 	}
 
-	go d.out()
-	go d.in()
+	for i := 0; i < runtime.NumCPU(); i++ {
+		go d.in()
+		go d.out()
+	}
 
 	return d
 }
