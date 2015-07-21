@@ -3,7 +3,7 @@
 bane
 ====
 
-Making the development of concurrent UDP based daemons less painful.
+Making the development of concurrent UDP based daemons *fun*.
 
 Example (Echo Server)
 ---------------------

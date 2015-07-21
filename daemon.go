@@ -1,23 +1,25 @@
-package bane
+package bane // import "github.com/alexanderGugel/bane"
 
 import (
 	"net"
 	"runtime"
 )
 
+// Packet represents an entity received a given client.
 type Packet struct {
-	Addr *net.UDPAddr
-	Data []byte
-	Err  error
+	Addr *net.UDPAddr // UDPAddr represents the address of the client's UDP end point.
+	Data []byte       // Data represents the binary data that has been received by the client.
+	Err  error        // Optional error associated with the packet, either encountered during receival or sending procedure.
 }
 
+// Daemon represents a UDP server listening that uses the specified UDP connection and exposes corresponding channels used for interacting with the network.
 type Daemon struct {
-	Conn       *net.UDPConn
-	Out        chan *Packet
-	In         chan *Packet
-	OutErr     chan *Packet
-	InErr      chan *Packet
-	PacketSize int
+	Conn       *net.UDPConn // The UDPConn connection that is being read from.
+	Out        chan *Packet // Channel exposing outgoing packets.
+	In         chan *Packet // Channel exposing incoming packets.
+	OutErr     chan *Packet // Channel exposing errors encountered while writing to the UDP connection.
+	InErr      chan *Packet // Channel exposing errors encountered while reading from the UDP connection.
+	PacketSize int          // Maximum allowed packet size for incoming packets. Used for buffer initialisation.
 }
 
 func (d *Daemon) out() {
@@ -26,7 +28,6 @@ func (d *Daemon) out() {
 		if err != nil {
 			packet.Err = err
 			d.OutErr <- packet
-			continue
 		}
 	}
 }
@@ -38,12 +39,14 @@ func (d *Daemon) in() {
 		packet := Packet{addr, b[:n], err}
 		if err != nil {
 			d.InErr <- &packet
-			continue
+		} else {
+			d.In <- &packet
 		}
-		d.In <- &packet
 	}
 }
 
+// New returns a new bane daemon listening on the passed in UDP connection.
+// packetSize specifies the maximum allowable packet size for incoming messages.
 func New(conn *net.UDPConn, packetSize int) *Daemon {
 	d := &Daemon{
 		Conn:       conn,
@@ -62,6 +65,8 @@ func New(conn *net.UDPConn, packetSize int) *Daemon {
 	return d
 }
 
+// NewFromAddr returns a new bane daemon bound to the specified network address.
+// packetSize specifies the maximum allowable packet size for incoming messages.
 func NewFromAddr(network string, addr string, packetSize int) (*Daemon, error) {
 	resolvedAddr, err := net.ResolveUDPAddr(network, addr)
 	if err != nil {
